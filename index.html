@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <title>DocDocDoc</title>
+</head>
+<style>
+  .app {
+    max-width: 600px;
+    margin: 0 auto;
+    max-height: 100vh;
+    overflow: auto;
+  }
+
+  .search input {
+    width: 88%;
+  }
+
+
+  .td {
+    background-color: rgb(236, 236, 236);
+    display: block;
+    border: 1px solid black;
+    border-radius: 2px;
+    width: 580px;
+    margin: 10px 0;
+  }
+
+  .td p {
+    margin: 0;
+  }
+
+  .date {
+    text-align: right;
+  }
+
+  .email {
+    text-decoration: none;
+    color: black;
+
+  }
+
+  .email:hover {
+    color: red;
+    cursor: pointer;
+  }
+
+  .name {
+    font-size: 20px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin: 2px 0;
+  }
+</style>
+
+<body>
+  <div id="app" class="app">
+    <div class="search">
+      <label for="search">Поиск:</label>
+      <input id="search" @input="inputHandler" v-model="message">
+    </div>
+    <template>
+      <tr class="tr" v-for="author in authors">
+        <td class="td">
+          <p class="date">{{author.date.slice(0,10)}} {{author.date.slice(11,19)}}</p>
+          <!---//{{author.date.slice(0,10)+author.date.slice(11,18)}} обрезаем дату--->
+          <p class="name">{{author.name}}</p>
+          <p><a class="email" href="mailto:${author.email}">{{author.email}}</a></p>
+        </td>
+      </tr>
+    </template>
+  </div>
+</body>
+<script>
+  var app = new Vue({
+    el: '#app',
+    data: {
+      message: "",
+      deepFake: [], //Служит в качестве неизменной основы для отображения фильтруемого массива
+      authors: []
+    },
+    created() {
+      this.getDataFromApi()
+    },
+    methods: {
+      getDataFromApi() {
+        axios.get(`https://api.github.com/repos/javascript-tutorial/en.javascript.info/commits`).then(response => {
+          this.deepFake = response.data.map(item => item.commit.author)
+          this.authors = response.data.map(item => item.commit.author)
+        })
+      },
+      inputHandler() {
+        if (this.message.length === 0) {
+          this.authors = this.deepFake
+        } else {
+          this.authors = this.deepFake.filter(item => item.name.toLowerCase().includes(this.message.trim().toLowerCase()) || item.email.toLowerCase().includes(this.message.trim().toLowerCase()))
+        }
+
+      }
+    }
+  })
+
+</script>
+
+</html>
